@@ -1,0 +1,30 @@
+sequenceDiagram
+    autonumber
+    actor Prat as Praticien
+    participant FE as front
+    participant GW as gateway
+    participant RS as risk-service
+    participant PS as patient-service
+    participant NS as notes-service
+
+    Prat->>FE: Consulter le risque (patientId)
+    FE->>GW: GET /risk/{patientId}
+    GW->>RS: route vers risk-service
+    RS->>PS: GET /patients/{id} (OpenFeign, appel direct)
+    alt patient introuvable
+        PS-->>RS: 404 Not Found
+        RS-->>GW: 404 patient inexistant
+    else patient trouve
+        PS-->>RS: Patient {dateNaissance, genre}
+        RS->>NS: GET /notes/patient/{id} (OpenFeign, appel direct)
+        alt notes indisponibles
+            NS-->>RS: erreur / timeout
+            RS-->>GW: 503 risque indetermine (jamais None par defaut)
+        else notes recuperees
+            NS-->>RS: Liste des notes
+            Note over RS: Calcul du niveau de risque<br/>(comptage des declencheurs distincts + regles age / genre)
+            RS-->>GW: RiskLevel
+        end
+    end
+    GW-->>FE: reponse (RiskLevel ou erreur)
+    FE-->>Prat: Affiche le niveau de risque ou un message d'erreur

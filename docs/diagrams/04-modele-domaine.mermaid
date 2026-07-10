@@ -1,0 +1,39 @@
+classDiagram
+    direction LR
+
+    class Patient {
+        +Long id
+        +String prenom
+        +String nom
+        +LocalDate dateNaissance
+        +Genre genre
+        +String adresse
+        +String telephone
+    }
+
+    class Note {
+        +String id
+        +Long patientId
+        +String contenu
+        +Instant dateCreation
+    }
+
+    class RiskLevel {
+        <<enumeration>>
+        NONE
+        BORDERLINE
+        IN_DANGER
+        EARLY_ONSET
+    }
+
+    class Genre {
+        <<enumeration>>
+        M
+        F
+    }
+
+    Patient ..> Genre : type
+    Patient "1" ..> "0..*" Note : patientId (logique, inter-service)
+    Note ..> RiskLevel : analyse des declencheurs
+
+    note for Patient "age : donnee derivee, calculee depuis dateNaissance (non stockee)"

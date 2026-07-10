@@ -1,0 +1,29 @@
+%% Vue de deploiement : conteneurs Docker, images, reseau et volumes.
+flowchart TB
+    User(["Utilisateur (navigateur)"])
+
+    subgraph HOST["Machine hote"]
+        subgraph DK["Docker - reseau medilabo-net"]
+            GW["Conteneur gateway<br/>image medilabo/gateway<br/>port publie 8080"]
+            FE["Conteneur front<br/>image medilabo/front"]
+            PS["Conteneur patient-service<br/>image medilabo/patient"]
+            NS["Conteneur notes-service<br/>image medilabo/notes"]
+            RS["Conteneur risk-service<br/>image medilabo/risk"]
+            SQL["Conteneur mysql<br/>image mysql:8"]
+            MG["Conteneur mongodb<br/>image mongo:7"]
+            VSQL[("volume mysql-data")]
+            VMG[("volume mongo-data")]
+        end
+    end
+
+    User -->|HTTP 8080| GW
+    GW --> FE
+    GW --> PS
+    GW --> NS
+    GW --> RS
+    PS --> SQL
+    NS --> MG
+    RS --> PS
+    RS --> NS
+    SQL --- VSQL
+    MG --- VMG

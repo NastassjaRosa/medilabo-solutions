@@ -1,0 +1,10 @@
+erDiagram
+    PATIENT {
+        BIGINT id PK "auto-increment"
+        VARCHAR prenom "VARCHAR(50), NOT NULL"
+        VARCHAR nom "VARCHAR(50), NOT NULL"
+        DATE date_naissance "NOT NULL"
+        CHAR genre "CHAR(1), NOT NULL, M ou F"
+        VARCHAR adresse "VARCHAR(255), NULL (optionnel)"
+        VARCHAR telephone "VARCHAR(20), NULL (optionnel)"
+    }

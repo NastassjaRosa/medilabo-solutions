@@ -1,0 +1,51 @@
+# --- Secrets (ne jamais versionner) ---
+.env
+*.env
+!.env.example
+**/application-secret*.yml
+**/application-secret*.yaml
+**/application-secret*.properties
+**/*secret*.properties
+secrets/
+*.pem
+*.key
+
+# --- Java / Maven ---
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+
+# --- Spring Boot ---
+*.original
+
+# --- IntelliJ IDEA ---
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# --- Claude Code (local, non partagé) ---
+.claude/settings.local.json
+
+# --- Docker / bases de données (données locales) ---
+mysql-data/
+mongo-data/
+*.dump
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Divers ---
+*.tmp
+*.bak
+node_modules/

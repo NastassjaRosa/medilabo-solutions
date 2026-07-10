@@ -1,0 +1,23 @@
+flowchart TB
+    User(["Utilisateur<br/>Organisateur / Praticien"])
+
+    subgraph net["Reseau Docker : medilabo-net"]
+        GW["gateway<br/>Spring Cloud Gateway<br/>port 8080 (seul expose)"]
+        FE["front<br/>Spring Boot + Thymeleaf"]
+        PS["patient-service<br/>Spring Boot REST"]
+        NS["notes-service<br/>Spring Boot REST"]
+        RS["risk-service<br/>Spring Boot REST (sans BDD)"]
+        SQL[("MySQL 8<br/>patientdb (3NF)")]
+        MONGO[("MongoDB 7<br/>notesdb")]
+    end
+
+    User -->|HTTP / HTTPS| GW
+    GW -->|/ui/**| FE
+    GW -->|/patients/**| PS
+    GW -->|/notes/**| NS
+    GW -->|/risk/**| RS
+    FE -.->|appels API via gateway| GW
+    PS --> SQL
+    NS --> MONGO
+    RS -.->|REST / OpenFeign| PS
+    RS -.->|REST / OpenFeign| NS

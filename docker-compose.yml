@@ -1,0 +1,102 @@
+# Squelette d'orchestration MédiLabo Solutions.
+# Seule la gateway publie un port vers l'hote. Les autres services et les bases
+# ne sont accessibles que sur le reseau interne "medilabo-net".
+# Les identifiants proviennent d'un fichier .env (non versionne) - voir .env.example.
+
+services:
+
+  gateway:
+    build: ./gateway
+    container_name: medilabo-gateway
+    ports:
+      - "8080:8080"          # seul port expose vers l'exterieur
+    depends_on:
+      - patient-service
+      - notes-service
+      - risk-service
+      - frontend
+    networks:
+      - medilabo-net
+
+  frontend:
+    build: ./frontend
+    container_name: medilabo-frontend
+    expose:
+      - "8080"
+    networks:
+      - medilabo-net
+
+  patient-service:
+    build: ./patient-service
+    container_name: medilabo-patient
+    expose:
+      - "8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      - mysql
+    networks:
+      - medilabo-net
+
+  notes-service:
+    build: ./notes-service
+    container_name: medilabo-notes
+    expose:
+      - "8080"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=admin
+    depends_on:
+      - mongodb
+    networks:
+      - medilabo-net
+
+  risk-service:
+    build: ./risk-service
+    container_name: medilabo-risk
+    expose:
+      - "8080"
+    # Pas de base dediee : appelle patient-service et notes-service (reseau interne).
+    depends_on:
+      - patient-service
+      - notes-service
+    networks:
+      - medilabo-net
+
+  mysql:
+    image: mysql:8
+    container_name: medilabo-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    expose:
+      - "3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - medilabo-net
+
+  mongodb:
+    image: mongo:7
+    container_name: medilabo-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+    expose:
+      - "27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - medilabo-net
+
+networks:
+  medilabo-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  mongo-data:

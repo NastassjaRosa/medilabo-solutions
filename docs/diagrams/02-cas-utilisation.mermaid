@@ -1,0 +1,28 @@
+%% Diagramme de cas d'utilisation (emule avec un flowchart : Mermaid n'a pas de type natif).
+%% Pour un rendu UML strict (acteurs en bonhomme, cas en ellipses), utiliser PlantUML ou draw.io.
+%% Seuls les cas OBSERVABLES par un acteur figurent ici ; les traitements internes
+%% (recuperation patient/notes, calcul du risque) relevent du diagramme de sequence.
+flowchart LR
+    Org(["Organisateur"])
+    Prat(["Praticien"])
+
+    subgraph SYS["Systeme - MediLabo Solutions"]
+        UC0(["S'authentifier"])
+        UC1(["Consulter les infos d'un patient"])
+        UC2(["Ajouter un patient"])
+        UC3(["Mettre a jour un patient"])
+        UC4(["Consulter l'historique / les notes"])
+        UC5(["Ajouter une note d'observation"])
+        UC6(["Consulter le risque de diabete"])
+    end
+
+    Org --- UC0
+    Org --- UC1
+    Org --- UC2
+    Org --- UC3
+
+    Prat --- UC0
+    Prat --- UC1
+    Prat --- UC4
+    Prat --- UC5
+    Prat --- UC6
