@@ -1,0 +1,25 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /ui
+
+spring:
+  application:
+    name: frontend
+  thymeleaf:
+    cache: true
+
+app:
+  gateway:
+    base-url: ${GATEWAY_BASE_URL:http://localhost:8080}
+    connect-timeout-ms: 3000
+    read-timeout-ms: 5000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

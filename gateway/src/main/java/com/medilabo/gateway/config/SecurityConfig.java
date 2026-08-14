@@ -66,9 +66,13 @@ public class SecurityConfig {
     }
 
     /**
-     * Regles d'acces : deny-by-default, seule {@code /actuator/health} est publique.
-     * Authentification HTTP Basic ; pas de formulaire de connexion ni de CSRF, la
-     * gateway ne servant pas de contenu HTML sur cette chaine API.
+     * Regles d'acces : deny-by-default, sauf {@code /actuator/health} et {@code /ui/**}.
+     * Authentification HTTP Basic pour la chaine API (patients/notes/risk) ; pas de
+     * formulaire de connexion ni de CSRF ici, la gateway ne servant pas de contenu HTML.
+     * {@code /ui/**} est laisse public au niveau de la gateway car le front gere lui-meme
+     * son authentification humaine (form login + session), conformement a la defense en
+     * profondeur : chaque microservice se securise lui-meme plutot que de faire confiance
+     * a la gateway.
      *
      * @param http constructeur de chaine de securite reactive fourni par Spring Security
      * @return la chaine de filtres de securite appliquee a toutes les requetes
@@ -78,7 +82,7 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/actuator/health").permitAll()
+                        .pathMatchers("/actuator/health", "/ui/**").permitAll()
                         .anyExchange().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
