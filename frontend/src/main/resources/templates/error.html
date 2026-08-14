@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Erreur — MédiLabo Solutions</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<main>
+    <h1>Une erreur est survenue</h1>
+    <p class="alert alert-error" th:text="${message} ?: 'Une erreur inattendue est survenue.'"></p>
+    <p><a th:href="@{/patients}">&larr; Retour à la liste des patients</a></p>
+</main>
+</body>
+</html>

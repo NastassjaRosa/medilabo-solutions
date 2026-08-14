@@ -6,6 +6,9 @@ spring:
     name: gateway
   cloud:
     gateway:
+      httpclient:
+        connect-timeout: 2000
+        response-timeout: 5s
       routes:
         - id: patient-service
           uri: http://patient-service:8080

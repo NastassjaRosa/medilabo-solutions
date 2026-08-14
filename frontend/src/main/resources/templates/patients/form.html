@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${mode == 'create'} ? 'Ajouter un patient' : 'Modifier un patient'">Patient</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+    <p><a th:href="@{/patients}">&larr; Retour à la liste</a></p>
+    <h1 th:text="${mode == 'create'} ? 'Ajouter un patient' : 'Modifier un patient'">Patient</h1>
+
+    <form th:action="${mode == 'create'} ? @{/patients} : @{/patients/{id}(id=${patient.id})}"
+          th:object="${patient}" method="post">
+
+        <div class="field">
+            <label for="prenom">Prénom</label>
+            <input type="text" id="prenom" th:field="*{prenom}"/>
+            <p class="error" th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}"></p>
+        </div>
+
+        <div class="field">
+            <label for="nom">Nom</label>
+            <input type="text" id="nom" th:field="*{nom}"/>
+            <p class="error" th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}"></p>
+        </div>
+
+        <div class="field">
+            <label for="dateNaissance">Date de naissance</label>
+            <input type="date" id="dateNaissance" th:field="*{dateNaissance}"/>
+            <p class="error" th:if="${#fields.hasErrors('dateNaissance')}" th:errors="*{dateNaissance}"></p>
+        </div>
+
+        <div class="field">
+            <label for="genre">Genre</label>
+            <select id="genre" th:field="*{genre}">
+                <option value="">— Sélectionner —</option>
+                <option th:each="g : ${genres}" th:value="${g}"
+                        th:text="${g.name() == 'M'} ? 'Homme' : 'Femme'"></option>
+            </select>
+            <p class="error" th:if="${#fields.hasErrors('genre')}" th:errors="*{genre}"></p>
+        </div>
+
+        <div class="field">
+            <label for="adresse">Adresse (optionnelle)</label>
+            <input type="text" id="adresse" th:field="*{adresse}"/>
+            <p class="error" th:if="${#fields.hasErrors('adresse')}" th:errors="*{adresse}"></p>
+        </div>
+
+        <div class="field">
+            <label for="telephone">Téléphone (optionnel)</label>
+            <input type="text" id="telephone" th:field="*{telephone}"/>
+            <p class="error" th:if="${#fields.hasErrors('telephone')}" th:errors="*{telephone}"></p>
+        </div>
+
+        <button type="submit" class="button">Enregistrer</button>
+    </form>
+</main>
+</body>
+</html>

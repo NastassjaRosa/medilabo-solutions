@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Connexion — MédiLabo Solutions</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<main>
+    <h1>Connexion</h1>
+    <p class="alert alert-error" th:if="${param.error}">Identifiants incorrects.</p>
+    <p class="alert" th:if="${param.logout}">Vous avez été déconnecté.</p>
+    <form th:action="@{/login}" method="post">
+        <div class="field">
+            <label for="username">Identifiant</label>
+            <input type="text" id="username" name="username" required="required" autofocus="autofocus"/>
+        </div>
+        <div class="field">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required="required"/>
+        </div>
+        <button type="submit" class="button">Se connecter</button>
+    </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,86 @@
+body {
+    font-family: system-ui, sans-serif;
+    margin: 0;
+    background: #f7f7f8;
+    color: #1a1a1a;
+}
+
+header {
+    background: #2c3e50;
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+main {
+    max-width: 960px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+th, td {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #ddd;
+}
+
+form.inline {
+    display: inline;
+}
+
+.field {
+    margin-bottom: 1rem;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+.field input, .field select {
+    width: 100%;
+    max-width: 320px;
+    padding: 0.4rem;
+    box-sizing: border-box;
+}
+
+.error {
+    color: #b00020;
+}
+
+.button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #2c3e50;
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.alert-error {
+    background: #fdecea;
+    color: #b00020;
+}
