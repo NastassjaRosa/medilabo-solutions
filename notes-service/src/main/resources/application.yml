@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: notes-service
+  # spring.data.mongodb.uri est volontairement absent ici : en conteneur, la variable
+  # d'environnement SPRING_DATA_MONGODB_URI est liee automatiquement par le binding
+  # assoupli de Spring Boot. En test, son absence laisse l'auto-configuration Mongo
+  # embarque (Flapdoodle) demarrer une instance sur un port libre.
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

@@ -58,6 +58,8 @@ services:
       - "8080"
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=admin
+      GATEWAY_AUTH_USERNAME: ${GATEWAY_AUTH_USERNAME}
+      GATEWAY_AUTH_PASSWORD: ${GATEWAY_AUTH_PASSWORD}
     depends_on:
       - mongodb
     networks:
