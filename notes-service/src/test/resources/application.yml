@@ -1,0 +1,7 @@
+# Config specifique aux tests : MongoDB embarque (Flapdoodle) a la place du vrai MongoDB 7
+# utilise en conteneur. spring.data.mongodb.uri reste absent, voir main/resources/application.yml.
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 7.0.14
