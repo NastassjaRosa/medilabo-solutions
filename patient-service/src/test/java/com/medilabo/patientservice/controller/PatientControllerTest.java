@@ -8,6 +8,7 @@ import com.medilabo.patientservice.exception.PatientNotFoundException;
 import com.medilabo.patientservice.service.PatientService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,9 +27,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Tests du contrôleur REST {@link PatientController} : le service métier est
- * simulé pour isoler la couche web (routage, validation, codes HTTP).
+ * simulé pour isoler la couche web (routage, validation, codes HTTP). Les filtres
+ * Spring Security sont désactivés ici ; l'authentification est testée à part dans
+ * {@link com.medilabo.patientservice.config.PatientSecurityTest}.
  */
 @WebMvcTest(PatientController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class PatientControllerTest {
 
     @Autowired

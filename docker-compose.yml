@@ -26,6 +26,12 @@ services:
     container_name: medilabo-frontend
     expose:
       - "8080"
+    environment:
+      FRONTEND_AUTH_USERNAME: ${FRONTEND_AUTH_USERNAME}
+      FRONTEND_AUTH_PASSWORD: ${FRONTEND_AUTH_PASSWORD}
+      GATEWAY_AUTH_USERNAME: ${GATEWAY_AUTH_USERNAME}
+      GATEWAY_AUTH_PASSWORD: ${GATEWAY_AUTH_PASSWORD}
+      GATEWAY_BASE_URL: http://gateway:8080
     networks:
       - medilabo-net
 
@@ -38,6 +44,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      GATEWAY_AUTH_USERNAME: ${GATEWAY_AUTH_USERNAME}
+      GATEWAY_AUTH_PASSWORD: ${GATEWAY_AUTH_PASSWORD}
     depends_on:
       - mysql
     networks:
