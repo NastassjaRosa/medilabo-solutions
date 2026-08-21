@@ -1,7 +1,9 @@
 package com.medilabo.frontend.controller;
 
+import com.medilabo.frontend.client.NoteGatewayClient;
 import com.medilabo.frontend.client.PatientGatewayClient;
 import com.medilabo.frontend.dto.Genre;
+import com.medilabo.frontend.dto.NoteFormDTO;
 import com.medilabo.frontend.dto.PatientDTO;
 import com.medilabo.frontend.exception.GatewayValidationException;
 import jakarta.validation.Valid;
@@ -24,12 +26,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class PatientUiController {
 
     private final PatientGatewayClient patientGatewayClient;
+    private final NoteGatewayClient noteGatewayClient;
 
     /**
      * @param patientGatewayClient client d'acces au dossier patient via la gateway
+     * @param noteGatewayClient    client d'acces a l'historique des notes via la gateway
      */
-    public PatientUiController(PatientGatewayClient patientGatewayClient) {
+    public PatientUiController(PatientGatewayClient patientGatewayClient, NoteGatewayClient noteGatewayClient) {
         this.patientGatewayClient = patientGatewayClient;
+        this.noteGatewayClient = noteGatewayClient;
     }
 
     /**
@@ -53,7 +58,7 @@ public class PatientUiController {
     }
 
     /**
-     * Detail des informations personnelles d'un patient.
+     * Detail des informations personnelles d'un patient, avec son historique de notes.
      *
      * @param id    identifiant du patient
      * @param model modele de la vue
@@ -62,7 +67,37 @@ public class PatientUiController {
     @GetMapping("/patients/{id}")
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("patient", patientGatewayClient.findById(id));
+        model.addAttribute("notes", noteGatewayClient.findByPatientId(id));
+        model.addAttribute("noteForm", new NoteFormDTO());
         return "patients/detail";
+    }
+
+    /**
+     * Ajoute une note d'observation a l'historique d'un patient.
+     *
+     * @param id            identifiant du patient concerne
+     * @param noteForm      contenu saisi par le praticien
+     * @param bindingResult resultat de la validation Bean Validation
+     * @param model         modele de la vue
+     * @return redirection vers le detail en cas de succes, sinon reaffichage du detail avec l'erreur
+     */
+    @PostMapping("/patients/{id}/notes")
+    public String addNote(@PathVariable Long id, @Valid @ModelAttribute("noteForm") NoteFormDTO noteForm,
+                           BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("patient", patientGatewayClient.findById(id));
+            model.addAttribute("notes", noteGatewayClient.findByPatientId(id));
+            return "patients/detail";
+        }
+        try {
+            noteGatewayClient.create(id, noteForm);
+            return "redirect:/patients/" + id;
+        } catch (GatewayValidationException validation) {
+            applyFieldErrors(bindingResult, validation, "noteForm");
+            model.addAttribute("patient", patientGatewayClient.findById(id));
+            model.addAttribute("notes", noteGatewayClient.findByPatientId(id));
+            return "patients/detail";
+        }
     }
 
     /**
@@ -99,7 +134,7 @@ public class PatientUiController {
             PatientDTO created = patientGatewayClient.create(patient);
             return "redirect:/patients/" + created.getId();
         } catch (GatewayValidationException validation) {
-            applyFieldErrors(bindingResult, validation);
+            applyFieldErrors(bindingResult, validation, "patient");
             model.addAttribute("genres", Genre.values());
             model.addAttribute("mode", "create");
             return "patients/form";
@@ -142,15 +177,16 @@ public class PatientUiController {
             patientGatewayClient.update(id, patient);
             return "redirect:/patients/" + id;
         } catch (GatewayValidationException validation) {
-            applyFieldErrors(bindingResult, validation);
+            applyFieldErrors(bindingResult, validation, "patient");
             model.addAttribute("genres", Genre.values());
             model.addAttribute("mode", "edit");
             return "patients/form";
         }
     }
 
-    private void applyFieldErrors(BindingResult bindingResult, GatewayValidationException validation) {
+    private void applyFieldErrors(BindingResult bindingResult, GatewayValidationException validation,
+                                   String objectName) {
         validation.getFieldErrors().forEach((field, message) ->
-                bindingResult.addError(new FieldError("patient", field, message)));
+                bindingResult.addError(new FieldError(objectName, field, message)));
     }
 }

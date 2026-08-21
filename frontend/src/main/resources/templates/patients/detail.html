@@ -29,6 +29,27 @@
         </tr>
     </table>
     <p><a class="button" th:href="@{/patients/{id}/edit(id=${patient.id})}">Modifier</a></p>
+
+    <section>
+        <h2>Historique des notes</h2>
+        <p th:if="${notes.isEmpty()}">Aucune note pour ce patient.</p>
+        <div class="note" th:each="note : ${notes}">
+            <p class="note-date" th:text="${note.dateCreation}"></p>
+            <p class="note-contenu" th:text="${note.contenu}"></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>Ajouter une note</h2>
+        <form th:action="@{/patients/{id}/notes(id=${patient.id})}" th:object="${noteForm}" method="post">
+            <div class="field">
+                <label for="contenu">Observation</label>
+                <textarea id="contenu" rows="6" th:field="*{contenu}"></textarea>
+                <p class="error" th:if="${#fields.hasErrors('contenu')}" th:errors="*{contenu}"></p>
+            </div>
+            <button type="submit" class="button">Ajouter la note</button>
+        </form>
+    </section>
 </main>
 </body>
 </html>
