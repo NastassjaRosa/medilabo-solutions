@@ -1,7 +1,9 @@
 package com.medilabo.frontend.controller;
 
+import com.medilabo.frontend.client.NoteGatewayClient;
 import com.medilabo.frontend.client.PatientGatewayClient;
 import com.medilabo.frontend.dto.Genre;
+import com.medilabo.frontend.dto.NoteDTO;
 import com.medilabo.frontend.dto.PatientDTO;
 import com.medilabo.frontend.exception.GatewayValidationException;
 import com.medilabo.frontend.exception.PatientNotFoundException;
@@ -15,7 +17,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +54,9 @@ class PatientUiControllerTest {
     @MockBean
     private PatientGatewayClient patientGatewayClient;
 
+    @MockBean
+    private NoteGatewayClient noteGatewayClient;
+
     @Test
     @WithMockUser
     void laListeEchappeLesDonneesPourEviterLeXss() throws Exception {
@@ -83,6 +90,70 @@ class PatientUiControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("patients/detail"))
                 .andExpect(model().attribute("patient", patient));
+    }
+
+    @Test
+    @WithMockUser
+    void leDetailAfficheLhistoriqueDesNotesEtEchappeLeHtml() throws Exception {
+        PatientDTO patient = new PatientDTO();
+        patient.setId(1L);
+        patient.setNom("Dupont");
+        patient.setPrenom("Jean");
+        patient.setDateNaissance(LocalDate.of(1980, 1, 1));
+        patient.setGenre(Genre.M);
+        when(patientGatewayClient.findById(1L)).thenReturn(patient);
+
+        NoteDTO note = new NoteDTO();
+        note.setId("abc");
+        note.setPatientId(1L);
+        note.setContenu("<script>alert(1)</script>\nDeuxieme ligne");
+        note.setDateCreation(Instant.parse("2026-01-01T10:00:00Z"));
+        when(noteGatewayClient.findByPatientId(1L)).thenReturn(List.of(note));
+
+        mockMvc.perform(get("/patients/1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("patients/detail"))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("<script>"))))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("&lt;script&gt;")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Deuxieme ligne")));
+    }
+
+    @Test
+    @WithMockUser
+    void laCreationDeNoteAvecContenuVideReaffichheLeDetailAvecErreur() throws Exception {
+        PatientDTO patient = new PatientDTO();
+        patient.setId(1L);
+        patient.setNom("Dupont");
+        patient.setPrenom("Jean");
+        patient.setDateNaissance(LocalDate.of(1980, 1, 1));
+        patient.setGenre(Genre.M);
+        when(patientGatewayClient.findById(1L)).thenReturn(patient);
+        when(noteGatewayClient.findByPatientId(1L)).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(post("/patients/1/notes")
+                        .with(csrf())
+                        .param("contenu", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("patients/detail"))
+                .andExpect(model().attributeHasFieldErrors("noteForm", "contenu"));
+    }
+
+    @Test
+    @WithMockUser
+    void laCreationDeNoteValideRedirigeVersLeDetail() throws Exception {
+        NoteDTO created = new NoteDTO();
+        created.setId("abc");
+        created.setPatientId(1L);
+        created.setContenu("Observation");
+        when(noteGatewayClient.create(eq(1L), any())).thenReturn(created);
+
+        mockMvc.perform(post("/patients/1/notes")
+                        .with(csrf())
+                        .param("contenu", "Observation"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/patients/1"));
+
+        verify(noteGatewayClient).create(eq(1L), any());
     }
 
     @Test
