@@ -1,0 +1,54 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: risk-service
+
+# Comptes / URLs des dependances : appel direct sur le reseau Docker interne,
+# jamais via une URL derivee d'une entree utilisateur (pas de risque SSRF).
+risk:
+  feign:
+    connect-timeout-ms: 2000
+    read-timeout-ms: 3000
+  clients:
+    patient-service:
+      url: http://patient-service:8080
+    notes-service:
+      url: http://notes-service:8080
+  # Les 11 declencheurs sont externalises ici : en ajouter un ne demande aucune
+  # modification de TriggerDetector (Open/Closed).
+  triggers:
+    - nom: "Hémoglobine A1C"
+      formes: ["hemoglobine a1c"]
+    - nom: "Microalbumine"
+      formes: ["microalbumine"]
+    - nom: "Taille"
+      formes: ["taille"]
+    - nom: "Poids"
+      formes: ["poids"]
+    - nom: "Fumeur"
+      # Formes explicites plutot qu'un radical "fum" : "fum" seul matcherait a tort
+      # "parfum" (faux positif tabac). Chaque variante est donc listee separement.
+      formes: ["fumeur", "fumeuse", "fume", "fumer", "fumait"]
+    - nom: "Anormal"
+      formes: ["anormal"]
+    - nom: "Cholestérol"
+      formes: ["cholesterol"]
+    - nom: "Vertiges"
+      formes: ["vertige"]
+    - nom: "Rechute"
+      formes: ["rechute"]
+    - nom: "Réaction"
+      formes: ["reaction"]
+    - nom: "Anticorps"
+      formes: ["anticorps"]
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

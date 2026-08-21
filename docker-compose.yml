@@ -71,6 +71,9 @@ services:
     expose:
       - "8080"
     # Pas de base dediee : appelle patient-service et notes-service (reseau interne).
+    environment:
+      GATEWAY_AUTH_USERNAME: ${GATEWAY_AUTH_USERNAME}
+      GATEWAY_AUTH_PASSWORD: ${GATEWAY_AUTH_PASSWORD}
     depends_on:
       - patient-service
       - notes-service
