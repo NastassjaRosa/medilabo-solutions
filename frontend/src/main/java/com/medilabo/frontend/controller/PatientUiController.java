@@ -2,9 +2,11 @@ package com.medilabo.frontend.controller;
 
 import com.medilabo.frontend.client.NoteGatewayClient;
 import com.medilabo.frontend.client.PatientGatewayClient;
+import com.medilabo.frontend.client.RiskGatewayClient;
 import com.medilabo.frontend.dto.Genre;
 import com.medilabo.frontend.dto.NoteFormDTO;
 import com.medilabo.frontend.dto.PatientDTO;
+import com.medilabo.frontend.exception.GatewayUnavailableException;
 import com.medilabo.frontend.exception.GatewayValidationException;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -27,14 +29,18 @@ public class PatientUiController {
 
     private final PatientGatewayClient patientGatewayClient;
     private final NoteGatewayClient noteGatewayClient;
+    private final RiskGatewayClient riskGatewayClient;
 
     /**
      * @param patientGatewayClient client d'acces au dossier patient via la gateway
      * @param noteGatewayClient    client d'acces a l'historique des notes via la gateway
+     * @param riskGatewayClient    client d'acces a l'evaluation du risque via la gateway
      */
-    public PatientUiController(PatientGatewayClient patientGatewayClient, NoteGatewayClient noteGatewayClient) {
+    public PatientUiController(PatientGatewayClient patientGatewayClient, NoteGatewayClient noteGatewayClient,
+                                RiskGatewayClient riskGatewayClient) {
         this.patientGatewayClient = patientGatewayClient;
         this.noteGatewayClient = noteGatewayClient;
+        this.riskGatewayClient = riskGatewayClient;
     }
 
     /**
@@ -69,6 +75,7 @@ public class PatientUiController {
         model.addAttribute("patient", patientGatewayClient.findById(id));
         model.addAttribute("notes", noteGatewayClient.findByPatientId(id));
         model.addAttribute("noteForm", new NoteFormDTO());
+        addRiskToModel(id, model);
         return "patients/detail";
     }
 
@@ -87,6 +94,7 @@ public class PatientUiController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("patient", patientGatewayClient.findById(id));
             model.addAttribute("notes", noteGatewayClient.findByPatientId(id));
+            addRiskToModel(id, model);
             return "patients/detail";
         }
         try {
@@ -96,7 +104,25 @@ public class PatientUiController {
             applyFieldErrors(bindingResult, validation, "noteForm");
             model.addAttribute("patient", patientGatewayClient.findById(id));
             model.addAttribute("notes", noteGatewayClient.findByPatientId(id));
+            addRiskToModel(id, model);
             return "patients/detail";
+        }
+    }
+
+    /**
+     * Ajoute le risque evalue au modele de la vue detail, ou un message d'erreur explicite si
+     * le risk-service (ou une de ses dependances) est indisponible. Ne jamais laisser cette
+     * panne remonter comme erreur globale : le reste de la page (infos patient, notes) doit
+     * rester consultable, et le risque ne doit jamais s'afficher a tort comme "None".
+     *
+     * @param id    identifiant du patient
+     * @param model modele de la vue
+     */
+    private void addRiskToModel(Long id, Model model) {
+        try {
+            model.addAttribute("risk", riskGatewayClient.findByPatientId(id));
+        } catch (GatewayUnavailableException e) {
+            model.addAttribute("riskError", "Risque indéterminé : le service d'évaluation est temporairement indisponible.");
         }
     }
 
