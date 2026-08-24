@@ -2,9 +2,12 @@ package com.medilabo.frontend.controller;
 
 import com.medilabo.frontend.client.NoteGatewayClient;
 import com.medilabo.frontend.client.PatientGatewayClient;
+import com.medilabo.frontend.client.RiskGatewayClient;
 import com.medilabo.frontend.dto.Genre;
 import com.medilabo.frontend.dto.NoteDTO;
 import com.medilabo.frontend.dto.PatientDTO;
+import com.medilabo.frontend.dto.RiskDTO;
+import com.medilabo.frontend.exception.GatewayUnavailableException;
 import com.medilabo.frontend.exception.GatewayValidationException;
 import com.medilabo.frontend.exception.PatientNotFoundException;
 import com.medilabo.frontend.exception.UiExceptionHandler;
@@ -57,6 +60,9 @@ class PatientUiControllerTest {
     @MockBean
     private NoteGatewayClient noteGatewayClient;
 
+    @MockBean
+    private RiskGatewayClient riskGatewayClient;
+
     @Test
     @WithMockUser
     void laListeEchappeLesDonneesPourEviterLeXss() throws Exception {
@@ -86,10 +92,38 @@ class PatientUiControllerTest {
         patient.setGenre(Genre.M);
         when(patientGatewayClient.findById(1L)).thenReturn(patient);
 
+        RiskDTO risk = new RiskDTO();
+        risk.setPatientId(1L);
+        risk.setRiskLevel("Borderline");
+        when(riskGatewayClient.findByPatientId(1L)).thenReturn(risk);
+
         mockMvc.perform(get("/patients/1"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("patients/detail"))
-                .andExpect(model().attribute("patient", patient));
+                .andExpect(model().attribute("patient", patient))
+                .andExpect(model().attribute("risk", risk))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Borderline")));
+    }
+
+    @Test
+    @WithMockUser
+    void leDetailAfficheUnMessageClairSiLeRisqueEstIndetermine() throws Exception {
+        PatientDTO patient = new PatientDTO();
+        patient.setId(1L);
+        patient.setNom("Dupont");
+        patient.setPrenom("Jean");
+        patient.setDateNaissance(LocalDate.of(1980, 1, 1));
+        patient.setGenre(Genre.M);
+        when(patientGatewayClient.findById(1L)).thenReturn(patient);
+        when(riskGatewayClient.findByPatientId(1L))
+                .thenThrow(new GatewayUnavailableException("risk-service indisponible", new RuntimeException()));
+
+        mockMvc.perform(get("/patients/1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("patients/detail"))
+                .andExpect(model().attribute("patient", patient))
+                .andExpect(model().attributeDoesNotExist("risk"))
+                .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString(">None<"))));
     }
 
     @Test

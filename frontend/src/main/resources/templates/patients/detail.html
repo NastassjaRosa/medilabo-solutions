@@ -31,6 +31,12 @@
     <p><a class="button" th:href="@{/patients/{id}/edit(id=${patient.id})}">Modifier</a></p>
 
     <section>
+        <h2>Niveau de risque</h2>
+        <p th:if="${risk != null}" class="risk-level" th:text="${risk.riskLevel}"></p>
+        <p th:if="${risk == null}" class="error" th:text="${riskError}"></p>
+    </section>
+
+    <section>
         <h2>Historique des notes</h2>
         <p th:if="${notes.isEmpty()}">Aucune note pour ce patient.</p>
         <div class="note" th:each="note : ${notes}">
