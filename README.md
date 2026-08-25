@@ -127,9 +127,16 @@ MYSQL_USER=medilabo
 MYSQL_PASSWORD=...
 
 # --- MongoDB (notes-service) ---
+# MONGO_USER / MONGO_PASSWORD : compte root, utilise uniquement par le conteneur
+# mongo pour son initialisation (creation de l'utilisateur applicatif ci-dessous).
 MONGO_USER=medilabo
 MONGO_PASSWORD=...
 MONGO_DATABASE=notesdb
+# MONGO_APP_USER / MONGO_APP_PASSWORD : compte applicatif dedie, cree au demarrage
+# avec le seul role readWrite sur notesdb (moindre privilege). C'est ce compte
+# que notes-service utilise pour se connecter a MongoDB, jamais le compte root.
+MONGO_APP_USER=medilabo-notes
+MONGO_APP_PASSWORD=...
 
 # --- Gateway (authentification HTTP Basic entre services) ---
 GATEWAY_AUTH_USERNAME=medilabo
@@ -187,6 +194,12 @@ diabète**), ajouter ou modifier un patient, et ajouter des notes de consultatio
   prévenir les injections XSS.
 - **Secrets** : tous les identifiants proviennent du fichier `.env` non versionné ;
   `.env.example` ne contient que des valeurs `change-me`.
+- **Moindre privilège MongoDB** : `notes-service` se connecte avec un compte
+  applicatif dédié (`MONGO_APP_USER` / `MONGO_APP_PASSWORD`), créé au premier
+  démarrage du conteneur par un script d'initialisation
+  (`mongodb/init/create-app-user.js`), avec le seul rôle `readWrite` restreint à
+  la base `notesdb`. Le compte root (`MONGO_INITDB_ROOT_*`) ne sert qu'à
+  l'initialisation du conteneur Mongo et n'est jamais utilisé par un service applicatif.
 
 ---
 

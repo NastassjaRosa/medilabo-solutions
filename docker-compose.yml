@@ -57,7 +57,7 @@ services:
     expose:
       - "8080"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_APP_USER}:${MONGO_APP_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=${MONGO_DATABASE}
       GATEWAY_AUTH_USERNAME: ${GATEWAY_AUTH_USERNAME}
       GATEWAY_AUTH_PASSWORD: ${GATEWAY_AUTH_PASSWORD}
     depends_on:
@@ -102,10 +102,13 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+      MONGO_APP_USER: ${MONGO_APP_USER}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
     expose:
       - "27017"
     volumes:
       - mongo-data:/data/db
+      - ./mongodb/init:/docker-entrypoint-initdb.d:ro
     networks:
       - medilabo-net
 
