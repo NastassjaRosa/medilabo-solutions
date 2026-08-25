@@ -39,7 +39,7 @@ public class Patient {
     private LocalDate dateNaissance;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "genre", nullable = false, length = 1)
+    @Column(name = "genre", nullable = false, columnDefinition = "CHAR(1)")
     private Genre genre;
 
     @Column(name = "adresse", length = 255)
