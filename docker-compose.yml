@@ -47,7 +47,8 @@ services:
       GATEWAY_AUTH_USERNAME: ${GATEWAY_AUTH_USERNAME}
       GATEWAY_AUTH_PASSWORD: ${GATEWAY_AUTH_PASSWORD}
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - medilabo-net
 
@@ -61,7 +62,8 @@ services:
       GATEWAY_AUTH_USERNAME: ${GATEWAY_AUTH_USERNAME}
       GATEWAY_AUTH_PASSWORD: ${GATEWAY_AUTH_PASSWORD}
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     networks:
       - medilabo-net
 
@@ -92,6 +94,12 @@ services:
       - "3306"
     volumes:
       - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - medilabo-net
 
@@ -109,6 +117,12 @@ services:
     volumes:
       - mongo-data:/data/db
       - ./mongodb/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping')\" -u \"$$MONGO_INITDB_ROOT_USERNAME\" -p \"$$MONGO_INITDB_ROOT_PASSWORD\" --authenticationDatabase admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     networks:
       - medilabo-net
 
